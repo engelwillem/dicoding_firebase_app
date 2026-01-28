@@ -1,4 +1,4 @@
-# PocketLog — Offline Catalog App (Flutter)
+# PocketLog — Offline Log App (Flutter)
 
 PocketLog adalah aplikasi log yang terinspirasi dalam bentuk Pocket untuk mengcapture hal-hal penting dengan mengkategorikan gambar pada momen penting, agar mudah mengakses dan tidak perlu repot mencari di tumpukan gambar dalam Hp. Ini merupakan **offline-first app** saya yang dibuat dengan **Flutter** 
 Proyek ini saya siapkan sebagai **submission Dicoding** sekaligus showcase portofolio: fokus pada struktur aplikasi yang rapi, navigasi jelas, dan UI aman dari overflow.

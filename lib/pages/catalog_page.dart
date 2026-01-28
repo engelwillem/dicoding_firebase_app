@@ -5,7 +5,7 @@ import '../app_router.dart';
 class CatalogPage extends StatelessWidget {
   const CatalogPage({super.key});
 
-  // Dummy data offline dulu (nanti kita rapihin nama+foto di poin berikutnya)
+  // Dummy data offline dulu (nanti dirapihin nama+foto kedepannya)
   static final List<Map<String, dynamic>> _products = [
     {'name': 'IT Runner Pro', 'price': 349000},
     {'name': 'IT Street Flex', 'price': 299000},
@@ -18,9 +18,7 @@ class CatalogPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Katalog'),
-      ),
+      appBar: AppBar(title: const Text('Katalog')),
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) {
@@ -58,15 +56,15 @@ class CatalogPage extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // Placeholder gambar dulu (nanti kita ganti jadi Image.asset)
+                          // Placeholder gambar dulu (nanti diganti jadi Image.asset)
                           Expanded(
                             child: Container(
                               width: double.infinity,
                               decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(12),
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .surfaceContainerHighest,
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.surfaceContainerHighest,
                               ),
                               child: const Icon(Icons.image, size: 48),
                             ),
