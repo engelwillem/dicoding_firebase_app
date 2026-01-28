@@ -101,4 +101,4 @@ Jika dikembangkan lebih lanjut, PocketLog bisa ditingkatkan dengan:
 - Sinkronisasi cloud opsional (Firebase / Supabase)
 
 ## 👤 Author (E B Willem)
-Jika Anda recruiter / business owner dan ingin berdiskusi tentang pengembangan aplikasi mobile untuk kebutuhan bisnis, silakan hubungi saya melalui profil GitHub ini.
+Jika Anda recruiter / business owner dan ingin berdiskusi tentang pengembangan aplikasi mobile untuk kebutuhan bisnis, maupun pelayanan Gereja atau Komunitas silakan hubungi saya melalui profil GitHub ini.
