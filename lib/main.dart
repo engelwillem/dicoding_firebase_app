@@ -110,7 +110,7 @@ class HomePage extends StatelessWidget {
               child: ListView.separated(
                 padding: const EdgeInsets.all(16),
                 itemCount: demoItems.length,
-                separatorBuilder: (_, __) => const SizedBox(height: 12),
+                separatorBuilder: (context, index) => const SizedBox(height: 12),
                 itemBuilder: (context, index) {
                   final item = demoItems[index];
                   return Card(
@@ -310,7 +310,7 @@ class _SearchPageState extends State<SearchPage> {
                     ? const Center(child: Text('Tidak ada hasil'))
                     : ListView.separated(
                         itemCount: filtered.length,
-                        separatorBuilder: (_, __) => const SizedBox(height: 10),
+                        separatorBuilder: (context, index) => const SizedBox(height: 10),
                         itemBuilder: (context, index) {
                           final item = filtered[index];
                           return Card(
