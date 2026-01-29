@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:pocketlog_app_ewillem/models/catalog_item.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:image_cropper/image_cropper.dart';
-import 'package:image_gallery_saver/image_gallery_saver.dart';
+import 'package:image_gallery_saver_plus/image_gallery_saver_plus.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:video_player/video_player.dart';
 import 'package:video_trimmer/video_trimmer.dart';
@@ -76,7 +76,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
     if (media == null) return;
 
     if (source == ImageSource.camera) {
-      await ImageGallerySaver.saveFile(media.path, isReturnPathOfIOS: true);
+      await ImageGallerySaverPlus.saveFile(media.path, isReturnPathOfIOS: true);
     }
 
     if (type == 'image') {
