@@ -1,12 +1,17 @@
-import 'dart:io';
+import 'dart:io' show Directory, File;
 
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:image_cropper/image_cropper.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:pocketlog_app_ewillem/models/catalog_item.dart';
 import 'package:pocketlog_app_ewillem/pages/add_edit_item_page.dart';
 
 void main() async {
-  await Hive.initFlutter();
+  WidgetsFlutterBinding.ensureInitialized();
+  final appDocumentDir = await getApplicationDocumentsDirectory();
+  Hive.init(appDocumentDir.path);
   Hive.registerAdapter(CatalogItemAdapter());
   final box = await Hive.openBox<CatalogItem>('catalog');
 
@@ -17,7 +22,7 @@ void main() async {
       (i) => CatalogItem(
         id: 'item_${i + 1}',
         title: 'Item ${i + 1}',
-        subtitle: 'Kategori ${(i % 4) + 1}',
+        category: 'Kategori ${(i % 4) + 1}',
         description:
             'Ini deskripsi item ${i + 1}. Data masih lokal agar UI + navigasi stabil dan bisa digunakan offline.',
       ),
@@ -29,11 +34,6 @@ void main() async {
 
   runApp(const MyApp());
 }
-
-// Menyimpan path gambar per item (untuk masa depan).
-final ValueNotifier<Map<String, String>> itemImagePaths = ValueNotifier(
-  <String, String>{},
-);
 
 // =====================
 // App (Stateless)
@@ -53,32 +53,33 @@ class MyApp extends StatelessWidget {
 }
 
 // =====================
-// Home (Stateless)
+// Home (Stateful)
 // =====================
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  String? _selectedCategory;
+
   Widget _thumb(BuildContext context, CatalogItem item) {
-    return ValueListenableBuilder<Map<String, String>>(
-      valueListenable: itemImagePaths,
-      builder: (context, map, _) {
-        final path = map[item.id];
-        return ClipRRect(
-          borderRadius: BorderRadius.circular(10),
-          child: SizedBox(
-            width: 56,
-            height: 56,
-            child: path == null
-                ? Container(
-                    color: Theme.of(
-                      context,
-                    ).colorScheme.surfaceContainerHighest,
-                    child: const Icon(Icons.image),
-                  )
-                : Image.file(File(path), fit: BoxFit.cover),
-          ),
-        );
-      },
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(10),
+      child: SizedBox(
+        width: 56,
+        height: 56,
+        child: item.imagePath == null
+            ? Container(
+                color: Theme.of(
+                  context,
+                ).colorScheme.surfaceContainerHighest,
+                child: const Icon(Icons.image),
+              )
+            : Image.file(File(item.imagePath!), fit: BoxFit.cover),
+      ),
     );
   }
 
@@ -105,28 +106,63 @@ class HomePage extends StatelessWidget {
       body: SafeArea(
         child: Column(
           children: [
+            ValueListenableBuilder(
+              valueListenable: catalogBox.listenable(),
+              builder: (context, Box<CatalogItem> box, _) {
+                final categories = ['All', ...box.values.map((e) => e.category).toSet()];
+                return SizedBox(
+                  height: 60,
+                  child: ListView.separated(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    scrollDirection: Axis.horizontal,
+                    itemCount: categories.length,
+                    separatorBuilder: (context, index) => const SizedBox(width: 8),
+                    itemBuilder: (context, index) {
+                      final category = categories[index];
+                      return FilterChip(
+                        label: Text(category),
+                        selected: _selectedCategory == category || (_selectedCategory == null && category == 'All'),
+                        onSelected: (selected) {
+                          setState(() {
+                            if (selected) {
+                              _selectedCategory = category == 'All' ? null : category;
+                            } else {
+                              _selectedCategory = null;
+                            }
+                          });
+                        },
+                      );
+                    },
+                  ),
+                );
+              },
+            ),
             Expanded(
               child: ValueListenableBuilder(
                 valueListenable: catalogBox.listenable(),
                 builder: (context, Box<CatalogItem> box, _) {
-                  if (box.isEmpty) {
+                  final items = box.values.where((item) {
+                    return _selectedCategory == null || item.category == _selectedCategory;
+                  }).toList();
+
+                  if (items.isEmpty) {
                     return const Center(
-                      child: Text('No items yet. Add one!'),
+                      child: Text('No items in this category.'),
                     );
                   }
                   return ListView.separated(
                     padding: const EdgeInsets.all(16),
-                    itemCount: box.length,
+                    itemCount: items.length,
                     separatorBuilder: (context, index) =>
                         const SizedBox(height: 12),
                     itemBuilder: (context, index) {
-                      final item = box.getAt(index)!;
+                      final item = items[index];
                       return Card(
                         elevation: 0,
                         child: ListTile(
                           leading: _thumb(context, item),
                           title: Text(item.title),
-                          subtitle: Text(item.subtitle),
+                          subtitle: Text(item.category),
                           trailing: const Icon(Icons.chevron_right),
                           onTap: () {
                             Navigator.push(
@@ -134,7 +170,7 @@ class HomePage extends StatelessWidget {
                               MaterialPageRoute(
                                 builder: (_) => DetailPage(item: item),
                               ),
-                            );
+                            ).then((_) => setState(() {}));
                           },
                         ),
                       );
@@ -160,7 +196,7 @@ class HomePage extends StatelessWidget {
             MaterialPageRoute(
               builder: (_) => const AddEditItemPage(),
             ),
-          );
+          ).then((_) => setState(() {}));
         },
         child: const Icon(Icons.add),
       ),
@@ -169,27 +205,78 @@ class HomePage extends StatelessWidget {
 }
 
 // =====================
-// Detail (Stateless)
+// Detail (Stateful)
 // =====================
-class DetailPage extends StatelessWidget {
+class DetailPage extends StatefulWidget {
   final CatalogItem item;
   const DetailPage({super.key, required this.item});
+
+  @override
+  State<DetailPage> createState() => _DetailPageState();
+}
+
+class _DetailPageState extends State<DetailPage> {
+  Future<void> _pickAndCropImage() async {
+    final ImagePicker picker = ImagePicker();
+    final XFile? image = await picker.pickImage(source: ImageSource.gallery);
+
+    if (image == null) return;
+
+    final CroppedFile? croppedFile = await ImageCropper().cropImage(
+      sourcePath: image.path,
+      uiSettings: [
+        AndroidUiSettings(
+          toolbarTitle: 'Crop Image',
+          toolbarColor: Theme.of(context).colorScheme.primary,
+          toolbarWidgetColor: Colors.white,
+          initAspectRatio: CropAspectRatioPreset.ratio16x9,
+          lockAspectRatio: true,
+        ),
+        IOSUiSettings(title: 'Crop Image'),
+      ],
+    );
+
+    if (croppedFile == null) return;
+
+    final Directory appDir = await getApplicationDocumentsDirectory();
+    final String fileName = '${widget.item.id}.jpg';
+    final String newPath = '${appDir.path}/$fileName';
+
+    final File newImage = await File(croppedFile.path).copy(newPath);
+
+    setState(() {
+      widget.item.imagePath = newImage.path;
+      widget.item.save();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(item.title),
+        title: Text(widget.item.title),
         actions: [
+          IconButton(
+            tooltip: 'Toggle Favorite',
+            onPressed: () {
+              setState(() {
+                widget.item.isFavorite = !widget.item.isFavorite;
+                widget.item.save();
+              });
+            },
+            icon: Icon(
+              widget.item.isFavorite ? Icons.favorite : Icons.favorite_border,
+            ),
+          ),
           IconButton(
             tooltip: 'Edit',
             onPressed: () {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (_) => AddEditItemPage(item: item),
+                  builder: (_) => AddEditItemPage(item: widget.item),
                 ),
-              );
+              ).then((_) => setState(() {}));
             },
             icon: const Icon(Icons.edit),
           ),
@@ -213,7 +300,7 @@ class DetailPage extends StatelessWidget {
                       TextButton(
                         child: const Text('Delete'),
                         onPressed: () {
-                          item.delete();
+                          widget.item.delete();
                           Navigator.of(context).pop(); // Close the dialog
                           Navigator.of(context).pop(); // Go back to the list
                         },
@@ -233,57 +320,39 @@ class DetailPage extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              ValueListenableBuilder<Map<String, String>>(
-                valueListenable: itemImagePaths,
-                builder: (context, map, _) {
-                  final path = map[item.id];
-                  return ClipRRect(
-                    borderRadius: BorderRadius.circular(16),
-                    child: AspectRatio(
-                      aspectRatio: 16 / 10,
-                      child: path == null
-                          ? Container(
-                              color: Theme.of(
-                                context,
-                              ).colorScheme.surfaceContainerHighest,
-                              child: const Center(
-                                child: Icon(Icons.image, size: 56),
-                              ),
-                            )
-                          : Image.file(File(path), fit: BoxFit.cover),
+              if (widget.item.imagePath != null)
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(16),
+                  child: AspectRatio(
+                    aspectRatio: 16 / 10,
+                    child: Image.file(
+                      File(widget.item.imagePath!),
+                      fit: BoxFit.cover,
                     ),
-                  );
-                },
-              ),
+                  ),
+                ),
               const SizedBox(height: 16),
               Text(
-                item.title,
+                widget.item.title,
                 style: Theme.of(context).textTheme.headlineMedium,
               ),
               const SizedBox(height: 8),
               Text(
-                item.subtitle,
+                widget.item.category,
                 style: Theme.of(context).textTheme.titleMedium,
               ),
               const SizedBox(height: 16),
               Text(
-                item.description,
+                widget.item.description,
                 style: Theme.of(context).textTheme.bodyLarge,
               ),
               const SizedBox(height: 24),
-              FilledButton.icon(
-                onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text(
-                        'Fitur foto sementara dinonaktifkan untuk submission agar stabil.',
-                      ),
-                    ),
-                  );
-                },
-                icon: const Icon(Icons.photo_library),
-                label: const Text('Pilih Foto & Crop'),
-              ),
+              if (widget.item.imagePath == null)
+                FilledButton.icon(
+                  onPressed: _pickAndCropImage,
+                  icon: const Icon(Icons.photo_library),
+                  label: const Text('Pilih Foto & Crop'),
+                ),
             ],
           ),
         ),
@@ -313,26 +382,20 @@ class _SearchPageState extends State<SearchPage> {
   }
 
   Widget _thumb(BuildContext context, CatalogItem item) {
-    return ValueListenableBuilder<Map<String, String>>(
-      valueListenable: itemImagePaths,
-      builder: (context, map, _) {
-        final path = map[item.id];
-        return ClipRRect(
-          borderRadius: BorderRadius.circular(10),
-          child: SizedBox(
-            width: 56,
-            height: 56,
-            child: path == null
-                ? Container(
-                    color: Theme.of(
-                      context,
-                    ).colorScheme.surfaceContainerHighest,
-                    child: const Icon(Icons.image),
-                  )
-                : Image.file(File(path), fit: BoxFit.cover),
-          ),
-        );
-      },
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(10),
+      child: SizedBox(
+        width: 56,
+        height: 56,
+        child: item.imagePath == null
+            ? Container(
+                color: Theme.of(
+                  context,
+                ).colorScheme.surfaceContainerHighest,
+                child: const Icon(Icons.image),
+              )
+            : Image.file(File(item.imagePath!), fit: BoxFit.cover),
+      ),
     );
   }
 
@@ -343,7 +406,7 @@ class _SearchPageState extends State<SearchPage> {
     final filtered = catalogBox.values.where((e) {
       if (q.isEmpty) return true;
       return e.title.toLowerCase().contains(q) ||
-          e.subtitle.toLowerCase().contains(q);
+          e.category.toLowerCase().contains(q);
     }).toList();
 
     return Scaffold(
@@ -387,7 +450,7 @@ class _SearchPageState extends State<SearchPage> {
                             child: ListTile(
                               leading: _thumb(context, item),
                               title: Text(item.title),
-                              subtitle: Text(item.subtitle),
+                              subtitle: Text(item.category),
                               onTap: () => Navigator.push(
                                 context,
                                 MaterialPageRoute(

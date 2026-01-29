@@ -19,23 +19,29 @@ class CatalogItemAdapter extends TypeAdapter<CatalogItem> {
     return CatalogItem(
       id: fields[0] as String,
       title: fields[1] as String,
-      subtitle: fields[2] as String,
+      category: fields[2] as String,
       description: fields[3] as String,
+      imagePath: fields[4] as String?,
+      isFavorite: fields[5] as bool,
     );
   }
 
   @override
   void write(BinaryWriter writer, CatalogItem obj) {
     writer
-      ..writeByte(4)
+      ..writeByte(6)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
       ..write(obj.title)
       ..writeByte(2)
-      ..write(obj.subtitle)
+      ..write(obj.category)
       ..writeByte(3)
-      ..write(obj.description);
+      ..write(obj.description)
+      ..writeByte(4)
+      ..write(obj.imagePath)
+      ..writeByte(5)
+      ..write(obj.isFavorite);
   }
 
   @override

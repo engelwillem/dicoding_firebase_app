@@ -11,15 +11,23 @@ class CatalogItem extends HiveObject {
   final String title;
 
   @HiveField(2)
-  final String subtitle;
+  final String category;
 
   @HiveField(3)
   final String description;
 
+  @HiveField(4)
+  String? imagePath;
+
+  @HiveField(5)
+  bool isFavorite;
+
   CatalogItem({
     required this.id,
     required this.title,
-    required this.subtitle,
+    required this.category,
     required this.description,
+    this.imagePath,
+    this.isFavorite = false,
   });
 }

@@ -14,14 +14,14 @@ class AddEditItemPage extends StatefulWidget {
 class _AddEditItemPageState extends State<AddEditItemPage> {
   final _formKey = GlobalKey<FormState>();
   late TextEditingController _titleController;
-  late TextEditingController _subtitleController;
+  late TextEditingController _categoryController;
   late TextEditingController _descriptionController;
 
   @override
   void initState() {
     super.initState();
     _titleController = TextEditingController(text: widget.item?.title ?? '');
-    _subtitleController = TextEditingController(text: widget.item?.subtitle ?? '');
+    _categoryController = TextEditingController(text: widget.item?.category ?? '');
     _descriptionController =
         TextEditingController(text: widget.item?.description ?? '');
   }
@@ -29,7 +29,7 @@ class _AddEditItemPageState extends State<AddEditItemPage> {
   @override
   void dispose() {
     _titleController.dispose();
-    _subtitleController.dispose();
+    _categoryController.dispose();
     _descriptionController.dispose();
     super.dispose();
   }
@@ -42,8 +42,10 @@ class _AddEditItemPageState extends State<AddEditItemPage> {
       final newItem = CatalogItem(
         id: id,
         title: _titleController.text,
-        subtitle: _subtitleController.text,
+        category: _categoryController.text,
         description: _descriptionController.text,
+        imagePath: widget.item?.imagePath,
+        isFavorite: widget.item?.isFavorite ?? false,
       );
 
       catalogBox.put(id, newItem);
@@ -74,11 +76,11 @@ class _AddEditItemPageState extends State<AddEditItemPage> {
                 },
               ),
               TextFormField(
-                controller: _subtitleController,
-                decoration: const InputDecoration(labelText: 'Subtitle'),
+                controller: _categoryController,
+                decoration: const InputDecoration(labelText: 'Category'),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please enter a subtitle';
+                    return 'Please enter a category';
                   }
                   return null;
                 },

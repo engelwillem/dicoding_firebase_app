@@ -12,3 +12,6 @@ ios/.symlinks/
 .idea/
 .vscode/
 .DS_Store
+
+# FVM Version Cache
+.fvm/
