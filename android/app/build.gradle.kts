@@ -6,13 +6,13 @@ plugins {
 
 android {
     namespace = "com.ebwillem.pocketlog"
-    compileSdk = flutter.compileSdkVersion
+    compileSdk = 34
     ndkVersion = flutter.ndkVersion
 
     defaultConfig {
         applicationId = "com.ebwillem.pocketlog"
         minSdk = flutter.minSdkVersion
-        targetSdk = flutter.targetSdkVersion
+        targetSdk = 34
         versionCode = flutter.versionCode
         versionName = flutter.versionName
     }

@@ -1,6 +1,6 @@
 {
-    "name": "dicoding_firebase_app",
-    "short_name": "dicoding_firebase_app",
+    "name": "pocketlog_app_ewillem",
+    "short_name": "pocketlog_app_ewillem",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

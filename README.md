@@ -1,7 +1,7 @@
 # PocketLog — Offline Log App (Flutter)
 
 PocketLog adalah aplikasi Log File yang terinspirasi dalam bentuk Pocket untuk mengcapture hal-hal penting dengan mengkategorikan gambar pada momen penting, agar mudah mengakses dan tidak perlu repot mencari di tumpukan gambar dalam Hp. Ini merupakan **offline-first app** saya yang dibuat dengan **Flutter** 
-Proyek ini saya siapkan sebagai **submission Dicoding** sekaligus showcase portofolio: fokus pada struktur aplikasi yang rapi, navigasi jelas, dan UI aman dari overflow.
+Proyek ini saya siapkan sebagai showcase portofolio: fokus pada struktur aplikasi yang rapi, navigasi jelas, dan UI aman dari overflow.
 
 ---
 
@@ -14,29 +14,13 @@ PocketLog membantu pengguna untuk:
 - Menyediakan ruang pengembangan untuk fitur lanjutan seperti:
   - foto per item (offline storage),
   - favorit,
-  - atau sinkronisasi ke cloud (opsional, bukan fokus submission)
+  - atau sinkronisasi ke cloud (opsional, bukan fokus utama)
 
 Cocok dikembangkan juga untuk kebutuhan sederhana lainnya seperti:
 - katalog produk UMKM,
 - inventaris personal,
 - catatan item koleksi,
 - daftar perlengkapan kerja/proyek.
-
----
-
-## ✅ Requirements Checklist (Dicoding Submission)
-Proyek ini memenuhi kriteria utama submission:
-
-- **Stateless Widget** ✅  
-  Contoh: `MyApp`, `HomePage`, `DetailPage`
-- **Stateful Widget** ✅  
-  Contoh: `SearchPage` (mengelola input & hasil filter)
-- **Minimal 2 halaman + Navigation** ✅  
-  Home → Detail, Home → Search
-- **Tidak overflow** ✅  
-  Menggunakan `SafeArea`, `SingleChildScrollView`, dan layout fleksibel
-- **Tema bebas + UI rapi** ✅  
-  Material 3 + color scheme seed
 
 ---
 
